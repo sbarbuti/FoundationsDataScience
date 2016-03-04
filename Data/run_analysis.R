@@ -15,7 +15,7 @@ list.files(paths)
 glimpse(tennisdata)
 
 dim(tennisdata)  
-#test
+
 tennisdata <- rename(tennisdata, tournamentname=.id)
 tennisdata %>% select(.id) %>% distinct
 
