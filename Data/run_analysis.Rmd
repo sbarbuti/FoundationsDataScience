@@ -1,0 +1,42 @@
+---
+title: "Tennis Analysis"
+author: "Sandra Barbuti"
+date: "March 3, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Introduction
+This code imports all files associated with 2013 Grand Slam Tennis Tournaments. There are 8 files imported - 4 men and 4 women for each of the 4 grand slam tournaments. The 8 files are merged into 1 dataset called 'tennisdata'.
+
+
+```{r message=FALSE}
+setwd("C:/Users/Sandra/Documents/DataScienceCert/Data")
+library(plyr)
+library(dplyr)
+paths <- dir(path = "C:/Users/Sandra/Documents/DataScienceCert/Data", pattern = "\\.csv")
+names(paths) <- basename(paths)
+tennisdata <- ldply(paths, read.csv)
+tennisdata <- rename(tennisdata, tournamentname=.id)
+```
+
+##Basic Statistics 
+Calculates mean and standard deviation of each variable
+
+```{r warning=FALSE}
+tennisdata %>% 
+  summarise_each(funs(mean,sd(., na.rm=TRUE)))
+```
+
+##Renames all observations
+Labels all observations with the corresponding activity labels and names respectively.
+
+
+##Dataset with Averages
+Create a tidy data set that contains the average of each variable for each activity. 
+
+
+
