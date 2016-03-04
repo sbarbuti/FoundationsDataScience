@@ -14,9 +14,13 @@ tennisdata <- ldply(paths, read.csv)
 list.files(paths)
 glimpse(tennisdata)
 
+dim(tennisdata)  
 
-
+tennisdata <- rename(tennisdata, tournamentname=.id)
 tennisdata %>% select(.id) %>% distinct
+
+regexpr('-', tournamentname)
+sub(".*:", "", string)
 
 # of records by file
 tennisdata %>% 
