@@ -1,0 +1,14 @@
+library(plyr)
+library(dplyr)
+paths <- dir(path = "C:/Users/Sandra/Documents/DataScienceCert/Data", pattern = "\\.csv$")
+names(paths) <- basename(paths)
+tennisdata <- ldply(paths, read.csv)
+
+glimpse(tennisdata)
+
+tennisdata %>% select(.id) %>% distinct
+
+tennisdata %>% 
+  group_by(.id) %>% 
+  count(.id)
+
