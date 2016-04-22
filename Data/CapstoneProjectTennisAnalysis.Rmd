@@ -38,24 +38,59 @@ tennisdata %>%
   summarise_each(funs(mean,sd(., na.rm=TRUE)))
 ```
 
-#Logistic Regression
-Runs logistic regression using the outcome as the independent variable. 
-
+#Manipulate dataset
+Takes tournament name field and splits it into 3 different variables.  
+* I am able to strip 3 fields out of 1 field but I am having trouble with the titles. Why are they in a different format. The fields are called - ex. tournamentname.format instead of just format.  
+* Also, I don't need the variable named format, how can i remove it? The methods I tried below do not work. Am thinking it has something to do with the question above.  
 ```{r warning=FALSE}
+#substring
+library(reshape2)
+tennisdata2 <- transform(tennisdata, tournamentname = colsplit(tennisdata$tournamentname, "[-.]", c("Tournament", "Gender", "Year", "Format")))
+#why can i not remove the format variable i created from the dataframe?
+#tennisdata3 <- subset(tennisdata2, select = -c(tennisdata2$tournamentname.Format))
+#varremove <- names(tennisdata2) %in% c("Format")
+#tennisdata3 <- tennisdata2[!varremove]
+```
+
+#Logistic Regression
+Runs logistic regression using the outcome as the independent variable.  
+*This seems to work fine.
+```{r warning=FALSE}
+#testing logistic regression works
 myvars <- c("Result","ACE.1","ACE.2")
 tennisdata1 <- tennisdata[myvars]
 model <- glm(Result ~.,family=binomial(link='logit'),data=tennisdata1)
 summary(model)
 ```
 
-```{r warning=FALSE}
-tennisdataM = read.csv("C:/Users/Sandra/Documents/DataScienceCert/Data/tennislist/tennismenslist.csv") 
-tennisdataW = read.csv("C:/Users/Sandra/Documents/DataScienceCert/Data/tennislist/tenniswomenslist.csv") 
-tennismerged <- left_join(tennisdata, tennisdataM, by=c("Player1"="PLAYER"))
-merged <- left_join(tennisdata, tennisdataM, by=c("Player1"="PLAYER"))
-merged2 <- left_join(merged, tennisdataW, by=c("Player1"="PLAYER"))
+Runs logistic regression with all variables.  
 
-#substring
-tournamentnamestr <- strsplit(tennisdata$tournamentname, split = "-")
-names(tournamentnamestr) <- c("Tournament", "Gender", "Year")
-names(tournamentnamestr)
+*Why does this not work? All p values = 1. Why? 
+```{r warning=FALSE}
+mylogit <- glm(Result ~ FNL.1 + FNL.2 +	FSP.1 +	FSW.1 +	SSP.1 +	SSW.1 +	ACE.1 +	DBF.1 +	WNR.1 +	UFE.1 +	BPC.1 +	BPW.1 +	NPA.1 +	NPW.1 +	TPW.1 +	ST1.1 +	ST2.1 +	ST3.1 +	ST4.1 +	ST5.1 +	FSP.2 +	FSW.2 +	SSP.2 +	SSW.2 +	ACE.2 +	DBF.2 +	WNR.2 +	UFE.2 +	BPC.2 +	BPW.2 +	NPA.2 +	NPW.2 +	TPW.2 +	ST1.2 +	ST2.2 +	ST3.2 +	ST4.2 +	ST5.2, data = tennisdata2, family = "binomial")
+summary(mylogit)
+```
+
+Use train and test
+
+```{r warning=FALSE}
+library(caTools)
+set.seed(1000)
+split =  sample.split(tennisdata2$Result, SplitRatio = .70)
+train = subset(tennisdata2, split ==TRUE)
+test = subset(tennisdata2, split == FALSE)
+tennislog = glm(Result ~ FNL.1 + FNL.2 +	FSP.1 +	FSW.1 +	SSP.1 +	SSW.1 +	ACE.1 +	DBF.1 +	WNR.1 +	UFE.1 +	BPC.1 +	BPW.1 +	NPA.1 +	NPW.1 +	TPW.1 +	ST1.1 +	ST2.1 +	ST3.1 +	ST4.1 +	ST5.1 +	FSP.2 +	FSW.2 +	SSP.2 +	SSW.2 +	ACE.2 +	DBF.2 +	WNR.2 +	UFE.2 +	BPC.2 +	BPW.2 +	NPA.2 +	NPW.2 +	TPW.2 +	ST1.2 +	ST2.2 +	ST3.2 +	ST4.2 +	ST5.2 , data = train, family=binomial)
+summary(tennislog)
+predictTest = predict(tennislog, type = "response", newdata = test)
+table(test$Result, predictTest > 0.5)
+library(ROCR)
+ROCPred = prediction(predictTest, test$Result)
+as.numeric(performance(ROCPred,"auc")@y.values)
+```
+
+#Correlations
+
+Testing a few variables
+```{r warning=FALSE}
+cor(train[c("Result","FNL.1","FNL.2")])  
+```
