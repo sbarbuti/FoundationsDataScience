@@ -1,0 +1,61 @@
+---
+title: "Capstone Project - Tennis Analysis"
+author: "Sandra Barbuti"
+date: "March 3, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Introduction
+This code imports all files associated with 2013 Grand Slam Tennis Tournaments. There are 8 files imported - 4 men and 4 women for each of the 4 grand slam tournaments. The 8 files are merged into 1 dataset called 'tennisdata'.
+
+
+```{r message=FALSE}
+setwd("C:/Users/Sandra/Documents/DataScienceCert/Data")
+library(plyr)
+library(dplyr)
+paths <- dir(path = "C:/Users/Sandra/Documents/DataScienceCert/Data", pattern = "\\.csv")
+names(paths) <- basename(paths)
+tennisdata <- ldply(paths, read.csv)
+tennisdata <- rename(tennisdata, tournamentname=.id)
+```
+
+##Summary
+Summary of all tennisdata variables.
+
+```{r warning=FALSE}
+summary(tennisdata)
+```
+
+##Basic Statistics 
+Calculates mean and standard deviation of each variable
+
+```{r warning=FALSE}
+tennisdata %>% 
+  summarise_each(funs(mean,sd(., na.rm=TRUE)))
+```
+
+#Logistic Regression
+Runs logistic regression using the outcome as the independent variable. 
+
+```{r warning=FALSE}
+myvars <- c("Result","ACE.1","ACE.2")
+tennisdata1 <- tennisdata[myvars]
+model <- glm(Result ~.,family=binomial(link='logit'),data=tennisdata1)
+summary(model)
+```
+
+```{r warning=FALSE}
+tennisdataM = read.csv("C:/Users/Sandra/Documents/DataScienceCert/Data/tennislist/tennismenslist.csv") 
+tennisdataW = read.csv("C:/Users/Sandra/Documents/DataScienceCert/Data/tennislist/tenniswomenslist.csv") 
+tennismerged <- left_join(tennisdata, tennisdataM, by=c("Player1"="PLAYER"))
+merged <- left_join(tennisdata, tennisdataM, by=c("Player1"="PLAYER"))
+merged2 <- left_join(merged, tennisdataW, by=c("Player1"="PLAYER"))
+
+#substring
+tournamentnamestr <- strsplit(tennisdata$tournamentname, split = "-")
+names(tournamentnamestr) <- c("Tournament", "Gender", "Year")
+names(tournamentnamestr)
